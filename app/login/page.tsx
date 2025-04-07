@@ -40,7 +40,7 @@ export default function LoginPage() {
       })
 
       // Redirect to dashboard after successful login
-      router.push("/dashboard")
+      router.push("/profile")
       setIsLoading(false)
     }, 1000)
   }
