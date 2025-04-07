@@ -1,286 +1,213 @@
 "use client"
 
-import type React from "react"
-
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Award, Search } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ScholarshipCard } from "@/components/scholarship-card"
-import { MentorCard } from "@/components/mentor-card"
-import { EducationChart } from "@/components/education-chart"
-import { mockScholarships, mockMentors } from "@/lib/mock-data"
 import { useUserStore } from "@/lib/user-store"
-import { generateRecommendations } from "@/lib/ai-matching"
-import { useToast } from "@/hooks/use-toast"
-import { Header } from "@/app/header"
+import { ScrollAnimation } from "@/components/scroll-animation"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Progress } from "@/components/ui/progress"
+import { BookOpen, Clock, FileText, Sparkles, User } from "lucide-react"
 
-export default function DashboardPage() {
+export default function Dashboard() {
   const router = useRouter()
-  const { toast } = useToast()
-  const { profile, isLoggedIn, aiScholarships, setAIScholarships, savedScholarships, applications } = useUserStore()
-  const [searchQuery, setSearchQuery] = useState("")
-  const [filteredScholarships, setFilteredScholarships] = useState(mockScholarships.slice(0, 3))
+  const { user, isLoggedIn } = useUserStore()
+  const [mounted, setMounted] = useState(false)
 
-  // Check if user is logged in
   useEffect(() => {
+    setMounted(true)
+
     if (!isLoggedIn) {
-      toast({
-        title: "Login Required",
-        description: "Please log in to access your dashboard",
-        variant: "destructive",
-      })
       router.push("/login")
     }
-  }, [isLoggedIn, router, toast])
+  }, [isLoggedIn, router])
 
-  // Generate AI scholarship recommendations
-  useEffect(() => {
-    if (isLoggedIn && aiScholarships.length === 0) {
-      const recommendations = generateRecommendations(profile)
-      setAIScholarships(recommendations)
-    }
-  }, [isLoggedIn, profile, aiScholarships.length, setAIScholarships])
+  if (!mounted || !isLoggedIn || !user) {
+    return null
+  }
 
-  // Combine regular and AI-generated scholarships for display
-  useEffect(() => {
-    const allScholarships = [...mockScholarships, ...aiScholarships]
+  const isProfileCompleted = user.profileCompleted
+  const hasInterests = user.interests && user.interests.length > 0
 
-    if (searchQuery.trim() === "") {
-      // Show top 3 recommended scholarships
-      setFilteredScholarships(allScholarships.slice(0, 3))
-    } else {
-      const filtered = allScholarships.filter(
-        (scholarship) =>
-          scholarship.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          scholarship.provider.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          scholarship.category.toLowerCase().includes(searchQuery.toLowerCase()),
-      )
-      setFilteredScholarships(filtered.slice(0, 3))
-    }
-  }, [searchQuery, aiScholarships])
-
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value)
+  // Stats will be zero until profile is completed
+  const stats = {
+    matchedScholarships: isProfileCompleted ? 12 : 0,
+    applications: isProfileCompleted ? 3 : 0,
+    profileCompletion: isProfileCompleted ? 100 : hasInterests ? 50 : 25,
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <Header activePage="dashboard" />
-      <main className="flex-1 py-6">
-        <div className="container">
-          <div className="flex flex-col gap-4 md:gap-8">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Matched Scholarships</CardTitle>
-                  <Award className="h-4 w-4 text-purple-600" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{aiScholarships.length + mockScholarships.length}</div>
-                  <p className="text-xs text-muted-foreground">+{aiScholarships.length} AI-matched scholarships</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Applications</CardTitle>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    className="h-4 w-4 text-teal-600"
-                  >
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                    <circle cx="9" cy="7" r="4" />
-                    <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-                  </svg>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{applications.length}</div>
-                  <p className="text-xs text-muted-foreground">
-                    {applications.filter((a) => a.status === "pending").length} pending review
-                  </p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Saved Scholarships</CardTitle>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    className="h-4 w-4 text-purple-600"
-                  >
-                    <rect width="20" height="14" x="2" y="5" rx="2" />
-                    <path d="M2 10h20" />
-                  </svg>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{savedScholarships.length}</div>
-                  <p className="text-xs text-muted-foreground">Click Save to bookmark scholarships</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Profile Completion</CardTitle>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    className="h-4 w-4 text-teal-600"
-                  >
-                    <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-                  </svg>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">75%</div>
-                  <p className="text-xs text-muted-foreground">
-                    <Link href="/profile" className="text-purple-600 hover:underline">
-                      Complete your profile
-                    </Link>{" "}
-                    for better matches
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-            <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-7">
-              <Card className="lg:col-span-4">
-                <CardHeader className="flex flex-row items-center">
-                  <div className="grid gap-2">
-                    <CardTitle>Scholarship Recommendations</CardTitle>
-                    <CardDescription>AI-powered matches based on your profile</CardDescription>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="relative">
-                    <div className="flex items-center mb-4">
-                      <Input
-                        placeholder="Search scholarships..."
-                        value={searchQuery}
-                        onChange={handleSearch}
-                        className="max-w-sm"
-                      />
-                      <Button variant="ghost" className="ml-2">
-                        <Search className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    <div className="space-y-4">
-                      {filteredScholarships.map((scholarship) => (
-                        <ScholarshipCard key={scholarship.id} scholarship={scholarship} />
-                      ))}
-                      {filteredScholarships.length === 0 && (
-                        <div className="text-center py-4">
-                          <p>No scholarships found matching your search.</p>
-                        </div>
-                      )}
-                    </div>
-                    <div className="mt-4 text-center">
-                      <Button
-                        variant="outline"
-                        className="text-purple-600"
-                        onClick={() => router.push("/scholarships")}
-                      >
-                        View all scholarships
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card className="lg:col-span-3">
-                <CardHeader>
-                  <CardTitle>Education Insights</CardTitle>
-                  <CardDescription>Real-time data on education disparities</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <EducationChart />
-                </CardContent>
-              </Card>
-            </div>
-            <div>
+    <div className="container py-10">
+      <ScrollAnimation>
+        <h1 className="mb-6 text-3xl font-bold">Dashboard</h1>
+      </ScrollAnimation>
+
+      <div className="mb-8">
+        <ScrollAnimation delay={0.3}>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <User className="h-5 w-5" />
+                Profile Completion
+              </CardTitle>
+              <CardDescription>
+                Complete your profile to get personalized scholarship and mentorship recommendations
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="mb-2 flex items-center justify-between">
+                <span className="text-sm font-medium">{stats.profileCompletion}% Complete</span>
+                <span className="text-sm text-muted-foreground">
+                  {isProfileCompleted ? "Completed" : "In Progress"}
+                </span>
+              </div>
+              <Progress value={stats.profileCompletion} className="h-2" />
+
+              {!isProfileCompleted && (
+                <div className="mt-4 rounded-lg border bg-muted/50 p-4">
+                  <h4 className="mb-2 font-medium">Next steps:</h4>
+                  <ul className="space-y-2">
+                    {!hasInterests && (
+                      <li className="flex items-center gap-2 text-sm">
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                        Add your interests to get matched with relevant scholarships
+                      </li>
+                    )}
+                    <li className="flex items-center gap-2 text-sm">
+                      <Clock className="h-4 w-4 text-muted-foreground" />
+                      Complete your educational background
+                    </li>
+                    <li className="flex items-center gap-2 text-sm">
+                      <Clock className="h-4 w-4 text-muted-foreground" />
+                      Add your skills and achievements
+                    </li>
+                  </ul>
+                </div>
+              )}
+            </CardContent>
+            <CardFooter>
+              <Button asChild>
+                <Link href="/profile">{isProfileCompleted ? "View Profile" : "Complete Profile"}</Link>
+              </Button>
+            </CardFooter>
+          </Card>
+        </ScrollAnimation>
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-3">
+        <ScrollAnimation delay={0.4} direction="up">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Matched Scholarships</CardTitle>
+              <BookOpen className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.matchedScholarships}</div>
+              <p className="text-xs text-muted-foreground">
+                {isProfileCompleted ? "+5 new matches this week" : "Complete your profile to see matches"}
+              </p>
+            </CardContent>
+            <CardFooter>
+              <Button variant="outline" size="sm" asChild className="w-full">
+                <Link href="/scholarships">View Scholarships</Link>
+              </Button>
+            </CardFooter>
+          </Card>
+        </ScrollAnimation>
+
+        <ScrollAnimation delay={0.5} direction="up">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Applications</CardTitle>
+              <FileText className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.applications}</div>
+              <p className="text-xs text-muted-foreground">
+                {isProfileCompleted ? "1 application in progress" : "Complete your profile to apply"}
+              </p>
+            </CardContent>
+            <CardFooter>
+              <Button variant="outline" size="sm" disabled={!isProfileCompleted} className="w-full">
+                Track Applications
+              </Button>
+            </CardFooter>
+          </Card>
+        </ScrollAnimation>
+
+        <ScrollAnimation delay={0.6} direction="up">
+          <Card className={user.isPremium ? "border-amber-500" : ""}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Premium Status</CardTitle>
+              <Sparkles className={`h-4 w-4 ${user.isPremium ? "text-amber-500" : "text-muted-foreground"}`} />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{user.isPremium ? "Active" : "Free"}</div>
+              <p className="text-xs text-muted-foreground">
+                {user.isPremium ? "Access to all premium features" : "Upgrade to access premium features"}
+              </p>
+            </CardContent>
+            <CardFooter>
+              {user.isPremium ? (
+                <Button variant="outline" size="sm" className="w-full">
+                  Manage Subscription
+                </Button>
+              ) : (
+                <Button size="sm" className="w-full">
+                  Upgrade to Premium
+                </Button>
+              )}
+            </CardFooter>
+          </Card>
+        </ScrollAnimation>
+      </div>
+
+      {isProfileCompleted && (
+        <div className="mt-10">
+          <ScrollAnimation delay={0.7}>
+            <h2 className="mb-4 text-xl font-bold">Recommended For You</h2>
+          </ScrollAnimation>
+
+          <div className="grid gap-6 md:grid-cols-2">
+            <ScrollAnimation delay={0.8} direction="left">
               <Card>
                 <CardHeader>
-                  <CardTitle>Recommended Mentors</CardTitle>
-                  <CardDescription>Connect with professionals in your field of interest</CardDescription>
+                  <CardTitle>Women in Tech Scholarship</CardTitle>
+                  <CardDescription>Application deadline: May 15, 2025</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Tabs defaultValue="all">
-                    <TabsList className="mb-4">
-                      <TabsTrigger value="all">All</TabsTrigger>
-                      <TabsTrigger value="stem">STEM</TabsTrigger>
-                      <TabsTrigger value="business">Business</TabsTrigger>
-                      <TabsTrigger value="arts">Arts & Humanities</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="all" className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
-                      {mockMentors.slice(0, 3).map((mentor) => (
-                        <MentorCard
-                          key={mentor.id}
-                          name={mentor.name}
-                          title={mentor.title}
-                          institution={mentor.institution}
-                          image={mentor.image}
-                          availability={mentor.availability}
-                        />
-                      ))}
-                    </TabsContent>
-                    <TabsContent value="stem" className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
-                      {mockMentors
-                        .filter((mentor) => mentor.field === "STEM")
-                        .map((mentor) => (
-                          <MentorCard
-                            key={mentor.id}
-                            name={mentor.name}
-                            title={mentor.title}
-                            institution={mentor.institution}
-                            image={mentor.image}
-                            availability={mentor.availability}
-                          />
-                        ))}
-                    </TabsContent>
-                    <TabsContent value="business" className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
-                      {mockMentors
-                        .filter((mentor) => mentor.field === "Business")
-                        .map((mentor) => (
-                          <MentorCard
-                            key={mentor.id}
-                            name={mentor.name}
-                            title={mentor.title}
-                            institution={mentor.institution}
-                            image={mentor.image}
-                            availability={mentor.availability}
-                          />
-                        ))}
-                    </TabsContent>
-                    <TabsContent value="arts" className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
-                      <div className="text-center py-4 col-span-full">
-                        <p>No mentors available in this category yet.</p>
-                        <Button variant="outline" className="mt-2">
-                          Request a mentor
-                        </Button>
-                      </div>
-                    </TabsContent>
-                  </Tabs>
+                  <p>
+                    $5,000 scholarship for women pursuing degrees in computer science, engineering, or related fields.
+                  </p>
                 </CardContent>
+                <CardFooter>
+                  <Button asChild>
+                    <Link href="/scholarships">View Details</Link>
+                  </Button>
+                </CardFooter>
               </Card>
-            </div>
+            </ScrollAnimation>
+
+            <ScrollAnimation delay={0.9} direction="right">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Leadership Mentorship Program</CardTitle>
+                  <CardDescription>Starting: June 1, 2025</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p>Connect with experienced leaders in your field for a 3-month mentorship program.</p>
+                </CardContent>
+                <CardFooter>
+                  <Button asChild>
+                    <Link href="/mentorship">View Details</Link>
+                  </Button>
+                </CardFooter>
+              </Card>
+            </ScrollAnimation>
           </div>
         </div>
-      </main>
+      )}
     </div>
   )
 }

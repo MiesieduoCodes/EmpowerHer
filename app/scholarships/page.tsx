@@ -1,248 +1,201 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { ChevronDown, Filter, Search } from "lucide-react"
+import { useState } from "react"
+import { PremiumBadge, usePremiumCheck } from "@/lib/premium-check"
+import { PremiumModal } from "@/components/premium-modal"
+import { ScrollAnimation } from "@/components/scroll-animation"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Label } from "@/components/ui/label"
-import { ScholarshipCard } from "@/components/scholarship-card"
-import { mockScholarships } from "@/lib/mock-data"
-import { useUserStore } from "@/lib/user-store"
-import { generateRecommendations } from "@/lib/ai-matching"
-import { Header } from "@/app/header"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Badge } from "@/components/ui/badge"
+import { Search, Filter, Sparkles, Calendar, DollarSign, GraduationCap, Lock } from "lucide-react"
+
+// Mock scholarship data
+const scholarships = [
+  {
+    id: "1",
+    title: "Women in STEM Scholarship",
+    organization: "Tech Forward Foundation",
+    amount: "$5,000",
+    deadline: "May 15, 2025",
+    category: "Technology",
+    description: "For women pursuing degrees in Science, Technology, Engineering, or Mathematics.",
+    isPremium: false,
+  },
+  {
+    id: "2",
+    title: "Future Leaders Grant",
+    organization: "Global Leadership Initiative",
+    amount: "$3,500",
+    deadline: "June 30, 2025",
+    category: "Business",
+    description: "Supporting women with leadership potential in business and entrepreneurship.",
+    isPremium: false,
+  },
+  {
+    id: "3",
+    title: "Healthcare Innovation Scholarship",
+    organization: "MedTech Alliance",
+    amount: "$7,500",
+    deadline: "April 10, 2025",
+    category: "Healthcare",
+    description: "For women pursuing innovative research in healthcare and medical technologies.",
+    isPremium: true,
+  },
+  {
+    id: "4",
+    title: "Creative Arts Fellowship",
+    organization: "Arts Forward Foundation",
+    amount: "$4,000",
+    deadline: "July 22, 2025",
+    category: "Arts",
+    description: "Supporting women in visual arts, performing arts, and creative writing.",
+    isPremium: false,
+  },
+  {
+    id: "5",
+    title: "Environmental Leadership Award",
+    organization: "Green Future Initiative",
+    amount: "$6,000",
+    deadline: "May 30, 2025",
+    category: "Science",
+    description: "For women pursuing studies in environmental science and sustainability.",
+    isPremium: true,
+  },
+  {
+    id: "6",
+    title: "Social Impact Scholarship",
+    organization: "Community Change Foundation",
+    amount: "$4,500",
+    deadline: "June 15, 2025",
+    category: "Social Sciences",
+    description: "Supporting women committed to creating positive social change in their communities.",
+    isPremium: true,
+  },
+]
 
 export default function ScholarshipsPage() {
-  const { profile, aiScholarships, setAIScholarships } = useUserStore()
-  const [searchQuery, setSearchQuery] = useState("")
-  const [category, setCategory] = useState("all")
-  const [showFilters, setShowFilters] = useState(false)
-  const [filteredScholarships, setFilteredScholarships] = useState([...mockScholarships])
-  const [isLoading, setIsLoading] = useState(true)
+  const { isPremium, isProfileCompleted } = usePremiumCheck()
+  const [searchTerm, setSearchTerm] = useState("")
+  const [activeTab, setActiveTab] = useState("all")
+  const [showPremiumModal, setShowPremiumModal] = useState(false)
+  const [selectedScholarship, setSelectedScholarship] = useState<string | null>(null)
 
-  // Generate AI scholarship recommendations if needed
-  useEffect(() => {
-    if (aiScholarships.length === 0) {
-      const recommendations = generateRecommendations(profile)
-      setAIScholarships(recommendations)
+  // Filter scholarships based on search term and active tab
+  const filteredScholarships = scholarships.filter((scholarship) => {
+    const matchesSearch =
+      scholarship.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      scholarship.organization.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      scholarship.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      scholarship.description.toLowerCase().includes(searchTerm.toLowerCase())
+
+    if (activeTab === "all") return matchesSearch
+    if (activeTab === "premium") return matchesSearch && scholarship.isPremium
+    if (activeTab === "regular") return matchesSearch && !scholarship.isPremium
+
+    return matchesSearch
+  })
+
+  const handleScholarshipClick = (id: string, isPremiumScholarship: boolean) => {
+    if (isPremiumScholarship && !isPremium) {
+      setSelectedScholarship(id)
+      setShowPremiumModal(true)
+    } else {
+      // Navigate to scholarship details
+      window.location.href = `/scholarships/apply/${id}`
     }
-    setIsLoading(false)
-  }, [profile, aiScholarships.length, setAIScholarships])
-
-  // Filter scholarships when search or category changes
-  useEffect(() => {
-    const allScholarships = [...mockScholarships, ...aiScholarships]
-    let filtered = allScholarships
-
-    // Filter by search query
-    if (searchQuery.trim() !== "") {
-      filtered = filtered.filter(
-        (scholarship) =>
-          scholarship.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          scholarship.provider.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          scholarship.description.toLowerCase().includes(searchQuery.toLowerCase()),
-      )
-    }
-
-    // Filter by category
-    if (category !== "all") {
-      filtered = filtered.filter((scholarship) => scholarship.category === category)
-    }
-
-    setFilteredScholarships(filtered)
-  }, [searchQuery, category, aiScholarships])
-
-  const handleSearch = () => {
-    // Search is handled by the useEffect above
-    console.log("Search query:", searchQuery)
-  }
-
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-xl font-medium mb-2">Loading scholarships...</h2>
-          <p className="text-muted-foreground">Our AI is finding the best matches for you</p>
-        </div>
-      </div>
-    )
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <Header activePage="scholarships" />
-      <main className="flex-1 py-6">
-        <div className="container">
-          <div className="flex flex-col gap-6">
-            <div className="flex flex-col gap-2">
-              <h1 className="text-3xl font-bold tracking-tight">Scholarships</h1>
-              <p className="text-muted-foreground">
-                Browse and apply for scholarships that match your profile and interests.
-              </p>
-            </div>
-            <div className="flex flex-col gap-4">
-              <Card>
-                <CardContent className="p-4">
-                  <div className="grid gap-4 md:grid-cols-3">
-                    <div className="flex items-center gap-2 md:col-span-2">
-                      <Input
-                        placeholder="Search scholarships..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full"
-                      />
-                      <Button onClick={handleSearch}>
-                        <Search className="h-4 w-4 mr-2" />
-                        Search
-                      </Button>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Select value={category} onValueChange={setCategory}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="All Categories" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Categories</SelectItem>
-                          <SelectItem value="STEM">STEM</SelectItem>
-                          <SelectItem value="Arts">Arts & Humanities</SelectItem>
-                          <SelectItem value="Business">Business</SelectItem>
-                          <SelectItem value="Healthcare">Healthcare</SelectItem>
-                          <SelectItem value="Leadership">Leadership</SelectItem>
-                          <SelectItem value="General">General</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Button variant="outline" onClick={() => setShowFilters(!showFilters)}>
-                        <Filter className="h-4 w-4 mr-2" />
-                        Filters
-                        <ChevronDown
-                          className={`h-4 w-4 ml-2 transition-transform ${showFilters ? "rotate-180" : ""}`}
-                        />
-                      </Button>
-                    </div>
-                  </div>
-                  {showFilters && (
-                    <div className="mt-4 grid gap-4 md:grid-cols-4 border-t pt-4">
-                      <div className="space-y-2">
-                        <h3 className="font-medium">Amount</h3>
-                        <div className="space-y-1">
-                          <div className="flex items-center space-x-2">
-                            <Checkbox id="amount-1" />
-                            <Label htmlFor="amount-1">Under $1,000</Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Checkbox id="amount-2" />
-                            <Label htmlFor="amount-2">$1,000 - $5,000</Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Checkbox id="amount-3" />
-                            <Label htmlFor="amount-3">$5,000 - $10,000</Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Checkbox id="amount-4" />
-                            <Label htmlFor="amount-4">$10,000+</Label>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <h3 className="font-medium">Deadline</h3>
-                        <div className="space-y-1">
-                          <div className="flex items-center space-x-2">
-                            <Checkbox id="deadline-1" />
-                            <Label htmlFor="deadline-1">Within 1 month</Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Checkbox id="deadline-2" />
-                            <Label htmlFor="deadline-2">1-3 months</Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Checkbox id="deadline-3" />
-                            <Label htmlFor="deadline-3">3+ months</Label>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <h3 className="font-medium">Education Level</h3>
-                        <div className="space-y-1">
-                          <div className="flex items-center space-x-2">
-                            <Checkbox id="edu-1" />
-                            <Label htmlFor="edu-1">High School</Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Checkbox id="edu-2" />
-                            <Label htmlFor="edu-2">Undergraduate</Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Checkbox id="edu-3" />
-                            <Label htmlFor="edu-3">Graduate</Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Checkbox id="edu-4" />
-                            <Label htmlFor="edu-4">Postgraduate</Label>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <h3 className="font-medium">Location</h3>
-                        <div className="space-y-1">
-                          <div className="flex items-center space-x-2">
-                            <Checkbox id="loc-1" />
-                            <Label htmlFor="loc-1">Local</Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Checkbox id="loc-2" />
-                            <Label htmlFor="loc-2">National</Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Checkbox id="loc-3" />
-                            <Label htmlFor="loc-3">International</Label>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="md:col-span-4 flex justify-end gap-2 mt-2">
-                        <Button
-                          variant="outline"
-                          onClick={() => {
-                            setSearchQuery("")
-                            setCategory("all")
-                            setFilteredScholarships([...mockScholarships, ...aiScholarships])
-                          }}
-                        >
-                          Reset Filters
-                        </Button>
-                        <Button onClick={handleSearch}>Apply Filters</Button>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {filteredScholarships.map((scholarship) => (
-                  <ScholarshipCard key={scholarship.id} scholarship={scholarship} />
-                ))}
-                {filteredScholarships.length === 0 && (
-                  <div className="col-span-full text-center py-12">
-                    <h3 className="text-lg font-medium">No scholarships found</h3>
-                    <p className="text-muted-foreground mt-1">Try adjusting your search or filters</p>
-                    <Button
-                      variant="outline"
-                      className="mt-4"
-                      onClick={() => {
-                        setSearchQuery("")
-                        setCategory("all")
-                        setFilteredScholarships([...mockScholarships, ...aiScholarships])
-                      }}
-                    >
-                      Reset Search
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </div>
+    <div className="container py-10">
+      <ScrollAnimation>
+        <h1 className="mb-6 text-3xl font-bold">Scholarships</h1>
+      </ScrollAnimation>
+
+      <ScrollAnimation delay={0.2}>
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search scholarships..."
+              className="pl-9"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
+          <Button variant="outline" className="gap-2">
+            <Filter className="h-4 w-4" />
+            Filter
+          </Button>
         </div>
-      </main>
+      </ScrollAnimation>
+
+      <ScrollAnimation delay={0.3}>
+        <Tabs defaultValue="all" className="mb-8" onValueChange={setActiveTab}>
+          <TabsList>
+            <TabsTrigger value="all">All Scholarships</TabsTrigger>
+            <TabsTrigger value="premium" className="flex items-center gap-1">
+              <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+              Premium
+            </TabsTrigger>
+            <TabsTrigger value="regular">Regular</TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </ScrollAnimation>
+
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {filteredScholarships.map((scholarship, index) => (
+          <ScrollAnimation key={scholarship.id} delay={0.3 + index * 0.1} direction="up">
+            <Card className={`relative ${scholarship.isPremium ? "border-amber-500" : ""}`}>
+              {scholarship.isPremium && <PremiumBadge />}
+
+              <CardHeader>
+                <CardTitle>{scholarship.title}</CardTitle>
+                <CardDescription>{scholarship.organization}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="mb-4 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <DollarSign className="h-4 w-4 text-muted-foreground" />
+                    <span>{scholarship.amount}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <span>Deadline: {scholarship.deadline}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <GraduationCap className="h-4 w-4 text-muted-foreground" />
+                    <Badge variant="outline">{scholarship.category}</Badge>
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground">{scholarship.description}</p>
+              </CardContent>
+              <CardFooter>
+                <Button
+                  className="w-full"
+                  onClick={() => handleScholarshipClick(scholarship.id, scholarship.isPremium)}
+                  disabled={!isProfileCompleted}
+                >
+                  {scholarship.isPremium && !isPremium ? (
+                    <>
+                      <Lock className="mr-2 h-4 w-4" />
+                      Unlock Premium
+                    </>
+                  ) : !isProfileCompleted ? (
+                    "Complete Profile to Apply"
+                  ) : (
+                    "View Details"
+                  )}
+                </Button>
+              </CardFooter>
+            </Card>
+          </ScrollAnimation>
+        ))}
+      </div>
+
+      {/* Premium upgrade modal */}
+      <PremiumModal isOpen={showPremiumModal} onClose={() => setShowPremiumModal(false)} />
     </div>
   )
 }
