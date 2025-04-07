@@ -1,8 +1,9 @@
 import Link from "next/link"
-import { ArrowRight, Award, BookOpen, LineChart, Users } from "lucide-react"
+import { ArrowRight, Award, BookOpen, LineChart, Users, Quote } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Header } from "@/app/header"
+import Header from "@/app/header"
+
 
 export default function Home() {
   return (
@@ -124,7 +125,7 @@ export default function Home() {
             </div>
           </div>
         </section>
-        
+
           {/* Testimonials */}
           <section className="w-full py-12 md:py-24 lg:py-32 bg-white">
           <div className="container px-4 md:px-6">
