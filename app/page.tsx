@@ -124,6 +124,84 @@ export default function Home() {
             </div>
           </div>
         </section>
+        
+          {/* Testimonials */}
+          <section className="w-full py-12 md:py-24 lg:py-32 bg-white">
+          <div className="container px-4 md:px-6">
+            <h2 className="text-3xl font-bold text-center sm:text-4xl mb-12">What People Are Saying</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                {
+                  name: "Aisha, Student",
+                  quote: "Empower Her changed my life. I found a full scholarship and a mentor who guided me through my career path.",
+                },
+                {
+                  name: "Ngozi, Mentor",
+                  quote: "Being part of Empower Her has been rewarding. I’ve connected with so many talented young women.",
+                },
+                {
+                  name: "Chinwe, Parent",
+                  quote: "I was worried about how we would afford university, but Empower Her gave us hope and real solutions.",
+                },
+              ].map((testimonial, idx) => (
+                <Card key={idx} className="h-full shadow-md">
+                  <CardHeader className="pb-4">
+                    <Quote className="w-6 h-6 text-purple-600" />
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground italic mb-4">"{testimonial.quote}"</p>
+                    <p className="font-semibold">{testimonial.name}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ */}
+        <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-r from-purple-100 to-teal-100">
+          <div className="container px-4 md:px-6">
+            <h2 className="text-3xl font-bold text-center sm:text-4xl mb-12">Frequently Asked Questions</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+              {[
+                {
+                  question: "Is Empower Her free to use?",
+                  answer: "Yes, our platform is completely free for students. We’re here to help you succeed without financial barriers.",
+                },
+                {
+                  question: "How do I qualify for a scholarship?",
+                  answer: "Our AI reviews your background, interests, and goals to match you with scholarships you're eligible for.",
+                },
+                {
+                  question: "Can I become a mentor?",
+                  answer: "Absolutely! We welcome female professionals from all backgrounds who want to guide and inspire the next generation.",
+                },
+                {
+                  question: "What age group is Empower Her for?",
+                  answer: "We support girls and young women from secondary school to university level.",
+                },
+              ].map((faq, idx) => (
+                <div key={idx}>
+                  <h4 className="text-lg font-semibold mb-2">{faq.question}</h4>
+                  <p className="text-muted-foreground">{faq.answer}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Final CTA */}
+        <section className="w-full py-16 bg-purple-600 text-white text-center">
+          <div className="container px-4 md:px-6 space-y-4">
+            <h2 className="text-3xl font-bold sm:text-4xl">Ready to Make a Difference?</h2>
+            <p className="text-lg max-w-xl mx-auto">Whether you're a student or a mentor, your journey starts here. Let's build a brighter future together.</p>
+            <Link href="/register">
+              <Button size="lg" className="bg-white text-purple-600 hover:bg-gray-100">
+                Get Started Now
+              </Button>
+            </Link>
+          </div>
+        </section>
       </main>
       <footer className="border-t py-6 md:py-0">
         <div className="container flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">
