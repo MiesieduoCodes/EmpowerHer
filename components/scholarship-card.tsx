@@ -2,10 +2,12 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Award, Calendar, ExternalLink, Bookmark, CheckCircle } from "lucide-react"
+import { Award, Calendar, ExternalLink, Bookmark, CheckCircle, Lock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { PremiumBadge } from "@/components/premium-badge"
+import { PaymentModal } from "@/components/payment-modal"
 import type { Scholarship } from "@/lib/types"
 import { useUserStore } from "@/lib/user-store"
 import { useToast } from "@/hooks/use-toast"
@@ -17,11 +19,13 @@ interface ScholarshipCardProps {
 export function ScholarshipCard({ scholarship }: ScholarshipCardProps) {
   const router = useRouter()
   const { toast } = useToast()
-  const { saveScholarship, unsaveScholarship, isSaved, startApplication, getApplicationStatus, isLoggedIn } =
+  const { saveScholarship, unsaveScholarship, isSaved, startApplication, getApplicationStatus, isLoggedIn, profile } =
     useUserStore()
 
   const [saved, setSaved] = useState(isSaved(scholarship.id))
+  const [showPaymentModal, setShowPaymentModal] = useState(false)
   const applicationStatus = getApplicationStatus(scholarship.id)
+  const isPremiumContent = scholarship.isPremium && !profile.isPremium
 
   const handleSave = () => {
     if (!isLoggedIn) {
@@ -31,6 +35,16 @@ export function ScholarshipCard({ scholarship }: ScholarshipCardProps) {
         variant: "destructive",
       })
       router.push("/login")
+      return
+    }
+
+    if (!profile.profileCompleted) {
+      toast({
+        title: "Complete Your Profile",
+        description: "Please complete your profile before saving scholarships",
+        variant: "destructive",
+      })
+      router.push("/profile")
       return
     }
 
@@ -62,12 +76,36 @@ export function ScholarshipCard({ scholarship }: ScholarshipCardProps) {
       return
     }
 
+    if (!profile.profileCompleted) {
+      toast({
+        title: "Complete Your Profile",
+        description: "Please complete your profile before applying for scholarships",
+        variant: "destructive",
+      })
+      router.push("/profile")
+      return
+    }
+
+    if (isPremiumContent) {
+      setShowPaymentModal(true)
+      return
+    }
+
+    const applicationId = startApplication(scholarship.id)
+    router.push(`/scholarships/apply/${applicationId}`)
+  }
+
+  const handlePaymentSuccess = () => {
+    setShowPaymentModal(false)
+    // Now that the user is premium, they can apply
     const applicationId = startApplication(scholarship.id)
     router.push(`/scholarships/apply/${applicationId}`)
   }
 
   return (
-    <Card className="overflow-hidden h-full flex flex-col">
+    <Card className="overflow-hidden h-full flex flex-col relative">
+      {scholarship.isPremium && <PremiumBadge />}
+
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
           <div>
@@ -109,6 +147,7 @@ export function ScholarshipCard({ scholarship }: ScholarshipCardProps) {
           size="sm"
           onClick={handleSave}
           className={saved ? "text-purple-600 border-purple-600" : ""}
+          disabled={!profile.profileCompleted}
         >
           {saved ? (
             <>
@@ -124,11 +163,17 @@ export function ScholarshipCard({ scholarship }: ScholarshipCardProps) {
         </Button>
         <Button
           size="sm"
-          className="bg-purple-600 hover:bg-purple-700"
+          className={isPremiumContent ? "bg-amber-500 hover:bg-amber-600" : "bg-purple-600 hover:bg-purple-700"}
           onClick={handleApply}
-          disabled={applicationStatus === "submitted" || applicationStatus === "pending"}
+          disabled={applicationStatus === "submitted" || applicationStatus === "pending" || !profile.profileCompleted}
         >
-          {applicationStatus ? (
+          {isPremiumContent ? (
+            <>
+              <Lock className="mr-2 h-3 w-3" />
+              <span className="hidden sm:inline">Unlock</span>
+              <span className="sm:hidden">Unlock</span>
+            </>
+          ) : applicationStatus ? (
             applicationStatus === "draft" ? (
               <>
                 <span className="hidden sm:inline">Continue</span>
@@ -149,7 +194,14 @@ export function ScholarshipCard({ scholarship }: ScholarshipCardProps) {
           )}
         </Button>
       </CardFooter>
+
+      {showPaymentModal && (
+        <PaymentModal
+          isOpen={showPaymentModal}
+          onClose={() => setShowPaymentModal(false)}
+          onSuccess={handlePaymentSuccess}
+        />
+      )}
     </Card>
   )
 }
-

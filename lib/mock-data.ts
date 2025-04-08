@@ -28,6 +28,7 @@ export const mockScholarships: Scholarship[] = [
       countries: ["Nigeria", "Ghana", "Kenya", "South Africa"],
     },
     keywords: ["Business", "Leadership", "Entrepreneurship", "Africa"],
+    isPremium: true,
   },
   {
     id: 3,
@@ -56,6 +57,7 @@ export const mockScholarships: Scholarship[] = [
       countries: ["All"],
     },
     keywords: ["Healthcare", "Medicine", "Nursing", "Public Health"],
+    isPremium: true,
   },
   {
     id: 5,
@@ -98,6 +100,7 @@ export const mockScholarships: Scholarship[] = [
       countries: ["Nigeria", "Ghana", "Kenya", "South Africa", "Ethiopia", "Tanzania"],
     },
     keywords: ["Africa", "Education", "Academic Excellence"],
+    isPremium: true,
   },
   {
     id: 8,
@@ -112,6 +115,7 @@ export const mockScholarships: Scholarship[] = [
       countries: ["All"],
     },
     keywords: ["Finance", "Economics", "Business", "Banking"],
+    isPremium: true,
   },
   {
     id: 9,
@@ -141,6 +145,7 @@ export const mockScholarships: Scholarship[] = [
       countries: ["All"],
     },
     keywords: ["Leadership", "Social Change", "Community Development", "Global"],
+    isPremium: true,
   },
 ]
 
@@ -153,6 +158,7 @@ export const mockMentors: Mentor[] = [
     field: "STEM",
     image: "/placeholder.svg?height=100&width=100",
     availability: "Available for mentoring",
+    isPremium: true,
   },
   {
     id: 2,
@@ -171,6 +177,7 @@ export const mockMentors: Mentor[] = [
     field: "Healthcare",
     image: "/placeholder.svg?height=100&width=100",
     availability: "Available next month",
+    isPremium: true,
   },
   {
     id: 4,
@@ -189,6 +196,7 @@ export const mockMentors: Mentor[] = [
     field: "STEM",
     image: "/placeholder.svg?height=100&width=100",
     availability: "1 spot available",
+    isPremium: true,
   },
   {
     id: 6,
@@ -198,30 +206,8 @@ export const mockMentors: Mentor[] = [
     field: "Business",
     image: "/placeholder.svg?height=100&width=100",
     availability: "Available for mentoring",
+    isPremium: true,
   },
 ]
 
-export const mockApplications: ScholarshipApplication[] = [
-  {
-    id: 1,
-    scholarshipId: 1,
-    status: "pending",
-    appliedDate: "March 15, 2025",
-    decisionDate: "June 1, 2025",
-  },
-  {
-    id: 2,
-    scholarshipId: 2,
-    status: "submitted",
-    appliedDate: "February 20, 2025",
-    decisionDate: "May 15, 2025",
-  },
-  {
-    id: 3,
-    scholarshipId: 5,
-    status: "draft",
-    appliedDate: "April 2, 2025",
-    decisionDate: "September 15, 2025",
-  },
-]
-
+export const mockApplications: ScholarshipApplication[] = []

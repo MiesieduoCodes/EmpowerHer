@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { useUserStore } from "@/lib/user-store"
 import { useToast } from "@/hooks/use-toast"
 
@@ -40,13 +41,16 @@ export default function LoginPage() {
       })
 
       // Redirect to dashboard after successful login
-      router.push("/profile")
+      router.push("/dashboard")
       setIsLoading(false)
     }, 1000)
   }
 
   return (
     <div className="container flex h-screen w-screen flex-col items-center justify-center px-4 sm:px-6">
+      <div className="absolute right-4 top-4 md:right-8 md:top-8">
+        <ThemeToggle />
+      </div>
       <Link href="/" className="absolute left-4 top-4 md:left-8 md:top-8 flex items-center">
         <BookOpen className="h-6 w-6 text-purple-600 mr-2" />
         <span className="font-bold text-xl">Empower Her</span>
@@ -115,4 +119,3 @@ export default function LoginPage() {
     </div>
   )
 }
-

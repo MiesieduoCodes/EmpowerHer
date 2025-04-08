@@ -13,6 +13,7 @@ export interface Scholarship {
   keywords?: string[]
   matchScore?: number
   isAIGenerated?: boolean
+  isPremium?: boolean
 }
 
 export interface Mentor {
@@ -23,6 +24,7 @@ export interface Mentor {
   field: string
   image: string
   availability: string
+  isPremium?: boolean
 }
 
 export interface UserProfile {
@@ -37,6 +39,10 @@ export interface UserProfile {
   interests: string[]
   skills?: string[]
   bio: string
+  profilePicture?: string
+  isPremium?: boolean
+  premiumPlan?: string | null
+  profileCompleted?: boolean
 }
 
 export interface SavedScholarship {
@@ -51,4 +57,3 @@ export interface ScholarshipApplication {
   appliedDate: string
   decisionDate?: string
 }
-

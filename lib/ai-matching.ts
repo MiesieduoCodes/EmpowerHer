@@ -185,4 +185,3 @@ function generateAIScholarships(
 
   return scholarships
 }
-
