@@ -43,6 +43,17 @@ export interface UserProfile {
   isPremium?: boolean
   premiumPlan?: string | null
   profileCompleted?: boolean
+  streakData?: {
+    lastActive: string
+    currentStreak: number
+    longestStreak: number
+    activityDates: string[] // Array of ISO date strings
+    activities: {
+      date: string
+      type: "profile_update" | "mentor_interaction" | "topic_added" | "application_submitted"
+      details?: string
+    }[]
+  }
 }
 
 export interface SavedScholarship {
@@ -56,4 +67,14 @@ export interface ScholarshipApplication {
   status: "draft" | "submitted" | "pending" | "accepted" | "rejected"
   appliedDate: string
   decisionDate?: string
+}
+
+export interface Notification {
+  id: number
+  title: string
+  message: string
+  type: "info" | "success" | "warning" | "error"
+  date: string
+  read: boolean
+  link?: string
 }

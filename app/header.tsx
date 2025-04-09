@@ -4,11 +4,12 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { BookOpen, Menu, Bell, User, LogOut, Crown } from "lucide-react"
+import { BookOpen, Menu, User, LogOut, Crown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { PaymentModal } from "@/components/payment-modal"
+import { NotificationPopup } from "@/components/notification-popup"
 import { useUserStore } from "@/lib/user-store"
 import { useToast } from "@/hooks/use-toast"
 
@@ -184,13 +185,7 @@ export function Header({ showAuth = true, activePage }: HeaderProps) {
                   Upgrade
                 </Button>
               )}
-              <Button variant="outline" size="icon" className="relative">
-                <Bell className="h-4 w-4" />
-                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-purple-600 text-[10px] font-medium text-white">
-                  3
-                </span>
-                <span className="sr-only">Notifications</span>
-              </Button>
+              <NotificationPopup />
               <Button variant="outline" size="sm" className="hidden md:flex" onClick={() => router.push("/profile")}>
                 <User className="mr-2 h-4 w-4" />
                 My Profile

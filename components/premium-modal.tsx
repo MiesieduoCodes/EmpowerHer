@@ -75,4 +75,3 @@ export function PremiumModal({ isOpen, onClose }: { isOpen: boolean; onClose: ()
     </Dialog>
   )
 }
-

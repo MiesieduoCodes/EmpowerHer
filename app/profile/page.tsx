@@ -18,6 +18,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { ScrollAnimationWrapper } from "@/components/scroll-animation-wrapper"
+import { StreakCalendar } from "@/components/streak-calendar"
 import { useUserStore } from "@/lib/user-store"
 import { useToast } from "@/hooks/use-toast"
 import { mockScholarships } from "@/lib/mock-data"
@@ -34,6 +35,7 @@ export default function ProfilePage() {
     savedScholarships,
     aiScholarships,
     checkProfileCompletion,
+    updateStreak,
   } = useUserStore()
 
   const [isEditing, setIsEditing] = useState(false)
@@ -76,6 +78,9 @@ export default function ProfilePage() {
       setShowProfilePictureInput(false)
 
       const isCompleted = checkProfileCompletion()
+
+      // Update streak for profile update
+      updateStreak("profile_update", "Updated profile information")
 
       toast({
         title: "Profile Updated",
@@ -227,6 +232,9 @@ export default function ProfilePage() {
                       </TabsTrigger>
                       <TabsTrigger value="applications" className="flex-1">
                         Applications
+                      </TabsTrigger>
+                      <TabsTrigger value="streak" className="flex-1">
+                        Streak
                       </TabsTrigger>
                     </TabsList>
                     <TabsContent value="personal">
@@ -663,6 +671,9 @@ export default function ProfilePage() {
                           </CardFooter>
                         )}
                       </Card>
+                    </TabsContent>
+                    <TabsContent value="streak">
+                      <StreakCalendar />
                     </TabsContent>
                   </Tabs>
                 </div>

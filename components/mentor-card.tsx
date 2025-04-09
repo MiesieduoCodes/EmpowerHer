@@ -23,7 +23,7 @@ interface MentorCardProps {
 export function MentorCard({ name, title, institution, image, availability, isPremium = false }: MentorCardProps) {
   const router = useRouter()
   const { toast } = useToast()
-  const { isLoggedIn, profile } = useUserStore()
+  const { isLoggedIn, profile, updateStreak } = useUserStore()
   const [requested, setRequested] = useState(false)
   const [showPaymentModal, setShowPaymentModal] = useState(false)
 
@@ -54,6 +54,9 @@ export function MentorCard({ name, title, institution, image, availability, isPr
       setShowPaymentModal(true)
       return
     }
+
+    // Update streak for mentor interaction
+    updateStreak("mentor_interaction", `Connected with mentor: ${name}`)
 
     setRequested(true)
     toast({
@@ -87,6 +90,9 @@ export function MentorCard({ name, title, institution, image, availability, isPr
       setShowPaymentModal(true)
       return
     }
+
+    // Update streak for mentor interaction
+    updateStreak("mentor_interaction", `Viewed mentor profile: ${name}`)
 
     toast({
       title: "Viewing Profile",

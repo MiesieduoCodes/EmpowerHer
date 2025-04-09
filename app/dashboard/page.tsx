@@ -15,10 +15,12 @@ import { ScrollAnimationWrapper } from "@/components/scroll-animation-wrapper"
 import { ScholarshipCard } from "@/components/scholarship-card"
 import { MentorCard } from "@/components/mentor-card"
 import { EducationChart } from "@/components/education-chart"
+import { PageLoader } from "@/components/page-loader"
 import { mockScholarships, mockMentors } from "@/lib/mock-data"
 import { useUserStore } from "@/lib/user-store"
 import { generateRecommendations } from "@/lib/ai-matching"
 import { useToast } from "@/hooks/use-toast"
+import { useLoading } from "@/hooks/use-loading"
 import { Header } from "@/app/header"
 
 export default function DashboardPage() {
@@ -27,6 +29,7 @@ export default function DashboardPage() {
   const { profile, isLoggedIn, aiScholarships, setAIScholarships, savedScholarships, applications } = useUserStore()
   const [searchQuery, setSearchQuery] = useState("")
   const [filteredScholarships, setFilteredScholarships] = useState(mockScholarships.slice(0, 3))
+  const isLoading = useLoading(1500) // Show loader for 1.5 seconds
 
   // Check if user is logged in
   useEffect(() => {
@@ -75,11 +78,15 @@ export default function DashboardPage() {
     setSearchQuery(e.target.value)
   }
 
+  if (isLoading) {
+    return <PageLoader />
+  }
+
   return (
     <div className="flex min-h-screen flex-col">
       <Header activePage="dashboard" />
       <main className="flex-1 py-6">
-        <div className="container">
+        <div className="container px-4 sm:px-6">
           {!profile.profileCompleted && (
             <Alert className="mb-6 border-amber-500">
               <AlertCircle className="h-4 w-4 text-amber-500" />
@@ -96,7 +103,7 @@ export default function DashboardPage() {
 
           <ScrollAnimationWrapper>
             <div className="flex flex-col gap-4 md:gap-8">
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <div className="grid gap-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-4">
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">Matched Scholarships</CardTitle>
@@ -271,7 +278,7 @@ export default function DashboardPage() {
                     </CardHeader>
                     <CardContent>
                       <Tabs defaultValue="all">
-                        <TabsList className="mb-4">
+                        <TabsList className="mb-4 overflow-x-auto flex w-full">
                           <TabsTrigger value="all">All</TabsTrigger>
                           <TabsTrigger value="stem">STEM</TabsTrigger>
                           <TabsTrigger value="business">Business</TabsTrigger>

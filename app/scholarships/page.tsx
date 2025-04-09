@@ -11,9 +11,11 @@ import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { ScrollAnimationWrapper } from "@/components/scroll-animation-wrapper"
 import { ScholarshipCard } from "@/components/scholarship-card"
+import { PageLoader } from "@/components/page-loader"
 import { mockScholarships } from "@/lib/mock-data"
 import { useUserStore } from "@/lib/user-store"
 import { generateRecommendations } from "@/lib/ai-matching"
+import { useLoading } from "@/hooks/use-loading"
 import { Header } from "@/app/header"
 
 export default function ScholarshipsPage() {
@@ -22,7 +24,7 @@ export default function ScholarshipsPage() {
   const [category, setCategory] = useState("all")
   const [showFilters, setShowFilters] = useState(false)
   const [filteredScholarships, setFilteredScholarships] = useState([...mockScholarships])
-  const [isLoading, setIsLoading] = useState(true)
+  const isLoading = useLoading(1500) // Show loader for 1.5 seconds
 
   // Generate AI scholarship recommendations if needed
   useEffect(() => {
@@ -30,7 +32,6 @@ export default function ScholarshipsPage() {
       const recommendations = generateRecommendations(profile)
       setAIScholarships(recommendations)
     }
-    setIsLoading(false)
   }, [profile, aiScholarships.length, setAIScholarships])
 
   // Filter scholarships when search or category changes
@@ -62,21 +63,14 @@ export default function ScholarshipsPage() {
   }
 
   if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-xl font-medium mb-2">Loading scholarships...</h2>
-          <p className="text-muted-foreground">Our AI is finding the best matches for you</p>
-        </div>
-      </div>
-    )
+    return <PageLoader />
   }
 
   return (
     <div className="flex min-h-screen flex-col">
       <Header activePage="scholarships" />
       <main className="flex-1 py-6">
-        <div className="container">
+        <div className="container px-4 sm:px-6">
           <ScrollAnimationWrapper>
             <div className="flex flex-col gap-6">
               <div className="flex flex-col gap-2">
