@@ -25,7 +25,7 @@ export default function AboutPage() {
               <div className="space-y-4">
                 <h2 className="text-3xl font-bold">Our Story</h2>
                 <p className="text-muted-foreground">
-                  Empower Her was founded by Obiene Tarinabo Divine, an SS 3 student of Word of Faith Group of Schools
+                  Empower Her was founded by Abusi Inuma Faithful, Ejimegbo Chinenye Joy and Obiene Tarinabo Divine, students of Word of Faith Group of Schools
                   and a proud member of DFC Inspire. The platform was created to address the critical issue of
                   educational inequality faced by young girls worldwide.
                 </p>
